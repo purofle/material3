@@ -651,9 +651,6 @@ internal data class FractionalThreshold(
     /*@FloatRange(from = 0.0, to = 1.0)*/
     private val fraction: Float
 ) : ThresholdConfig {
-    fun lerp(start: Float, stop: Float, fraction: Float): Float {
-        return (1 - fraction) * start + fraction * stop
-    }
     override fun Density.computeThreshold(fromValue: Float, toValue: Float): Float {
         return lerp(fromValue, toValue, fraction)
     }
