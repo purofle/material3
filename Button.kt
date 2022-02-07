@@ -19,6 +19,7 @@ package androidx.compose.material3
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.FocusInteraction
 import androidx.compose.foundation.interaction.HoverInteraction
 import androidx.compose.foundation.interaction.Interaction
@@ -31,13 +32,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.tokens.ElevatedButton
-import androidx.compose.material3.tokens.FilledButton
-import androidx.compose.material3.tokens.FilledButtonTonal
-import androidx.compose.material3.tokens.OutlinedButton
-import androidx.compose.material3.tokens.TextButton
-import androidx.compose.material3.tokens.Typography
+import androidx.compose.material3.tokens.ElevatedButtonTokens
+import androidx.compose.material3.tokens.FilledButtonTokens
+import androidx.compose.material3.tokens.FilledTonalButtonTokens
+import androidx.compose.material3.tokens.OutlinedButtonTokens
+import androidx.compose.material3.tokens.TextButtonTokens
+import androidx.compose.material3.tokens.TypographyTokens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -106,7 +106,7 @@ fun Button(
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     elevation: ButtonElevation? = ButtonDefaults.buttonElevation(),
-    shape: Shape = FilledButton.ContainerShape,
+    shape: Shape = FilledButtonTokens.ContainerShape,
     border: BorderStroke? = null,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
@@ -119,21 +119,25 @@ fun Button(
 
     // TODO(b/202880001): Apply shadow color from token (will not be possibly any time soon, if ever).
     Surface(
-        modifier = modifier.minimumTouchTargetSize(),
+        modifier = modifier
+            .minimumTouchTargetSize()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick
+            ),
+        interactionSource = interactionSource,
         shape = shape,
         color = containerColor,
         contentColor = contentColor,
-        shadowElevation = shadowElevation,
         tonalElevation = tonalElevation,
-        border = border,
-        onClick = onClick,
-        enabled = enabled,
-        role = Role.Button,
-        interactionSource = interactionSource,
-        indication = rememberRipple(),
-        ) {
+        shadowElevation = shadowElevation,
+        border = border
+    ) {
         CompositionLocalProvider(LocalContentColor provides contentColor) {
-            ProvideTextStyle(value = Typography.LabelLarge) {
+            ProvideTextStyle(value = TypographyTokens.LabelLarge) {
                 Row(
                     Modifier.defaultMinSize(
                         minWidth = ButtonDefaults.MinWidth,
@@ -168,7 +172,8 @@ fun Button(
  * - See [OutlinedButton] for a medium-emphasis button with a border.
  * - See [TextButton] for a low-emphasis button with no border.
  *
- * The default text style for internal [Text] components will be set to [Typography.LabelLarge].
+ * The default text style for internal [Text] components will be set to
+ * [TypographyTokens.LabelLarge].
  *
  * @param onClick Will be called when the user clicks the button.
  * @param modifier Modifier to be applied to the button.
@@ -197,7 +202,7 @@ fun ElevatedButton(
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     elevation: ButtonElevation? = ButtonDefaults.elevatedButtonElevation(),
-    shape: Shape = ElevatedButton.ContainerShape,
+    shape: Shape = ElevatedButtonTokens.ContainerShape,
     border: BorderStroke? = null,
     colors: ButtonColors = ButtonDefaults.elevatedButtonColors(),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
@@ -236,7 +241,8 @@ fun ElevatedButton(
  * - See [OutlinedButton] for a medium-emphasis button with a border.
  * - See [TextButton] for a low-emphasis button with no border.
  *
- * The default text style for internal [Text] components will be set to [Typography.LabelLarge].
+ * The default text style for internal [Text] components will be set to
+ * [TypographyTokens.LabelLarge].
  *
  * @param onClick Will be called when the user clicks the button.
  * @param modifier Modifier to be applied to the button.
@@ -264,7 +270,7 @@ fun FilledTonalButton(
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     elevation: ButtonElevation? = ButtonDefaults.filledTonalButtonElevation(),
-    shape: Shape = FilledButtonTonal.TonalContainerShape,
+    shape: Shape = FilledTonalButtonTokens.ContainerShape,
     border: BorderStroke? = null,
     colors: ButtonColors = ButtonDefaults.filledTonalButtonColors(),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
@@ -302,7 +308,8 @@ fun FilledTonalButton(
  * - See [OutlinedButton] for a medium-emphasis button with a border.
  * - See [TextButton] for a low-emphasis button with no border.
  *
- * The default text style for internal [Text] components will be set to [Typography.LabelLarge].
+ * The default text style for internal [Text] components will be set to
+ * [TypographyTokens.LabelLarge].
  *
  * @param onClick Will be called when the user clicks the button.
  * @param modifier Modifier to be applied to the button.
@@ -330,7 +337,7 @@ fun OutlinedButton(
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     elevation: ButtonElevation? = null,
-    shape: Shape = OutlinedButton.ContainerShape,
+    shape: Shape = OutlinedButtonTokens.ContainerShape,
     border: BorderStroke? = ButtonDefaults.outlinedButtonBorder,
     colors: ButtonColors = ButtonDefaults.outlinedButtonColors(),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
@@ -368,7 +375,8 @@ fun OutlinedButton(
  * - See [FilledTonalButton] for a middle ground between [OutlinedButton] and [Button].
  * - See [OutlinedButton] for a medium-emphasis button with a border.
  *
- * The default text style for internal [Text] components will be set to [Typography.LabelLarge].
+ * The default text style for internal [Text] components will be set to
+ * [TypographyTokens.LabelLarge].
  *
  * @param onClick Will be called when the user clicks the button.
  * @param modifier Modifier to be applied to the button.
@@ -399,7 +407,7 @@ fun TextButton(
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     elevation: ButtonElevation? = null,
-    shape: Shape = TextButton.ContainerShape,
+    shape: Shape = TextButtonTokens.ContainerShape,
     border: BorderStroke? = null,
     colors: ButtonColors = ButtonDefaults.textButtonColors(),
     contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
@@ -507,16 +515,13 @@ object ButtonDefaults {
      */
     @Composable
     fun buttonColors(
-        containerColor: Color = MaterialTheme.colorScheme.fromToken(FilledButton.ContainerColor),
-        contentColor: Color = MaterialTheme.colorScheme.fromToken(FilledButton.LabelTextColor),
+        containerColor: Color = FilledButtonTokens.ContainerColor.toColor(),
+        contentColor: Color = FilledButtonTokens.LabelTextColor.toColor(),
         disabledContainerColor: Color =
-            MaterialTheme.colorScheme
-                .fromToken(FilledButton.DisabledContainerColor)
-                .copy(alpha = FilledButton.DisabledContainerOpacity),
-        disabledContentColor: Color =
-            MaterialTheme.colorScheme
-                .fromToken(FilledButton.DisabledLabelTextColor)
-                .copy(alpha = FilledButton.DisabledLabelTextOpacity),
+            FilledButtonTokens.DisabledContainerColor.toColor()
+                .copy(alpha = FilledButtonTokens.DisabledContainerOpacity),
+        disabledContentColor: Color = FilledButtonTokens.DisabledLabelTextColor.toColor()
+                .copy(alpha = FilledButtonTokens.DisabledLabelTextOpacity),
     ): ButtonColors =
         DefaultButtonColors(
             containerColor = containerColor,
@@ -536,16 +541,14 @@ object ButtonDefaults {
      */
     @Composable
     fun elevatedButtonColors(
-        containerColor: Color = MaterialTheme.colorScheme.fromToken(ElevatedButton.ContainerColor),
-        contentColor: Color = MaterialTheme.colorScheme.fromToken(ElevatedButton.LabelTextColor),
-        disabledContainerColor: Color =
-            MaterialTheme.colorScheme
-                .fromToken(ElevatedButton.DisabledContainerColor)
-                .copy(alpha = ElevatedButton.DisabledContainerOpacity),
-        disabledContentColor: Color =
-            MaterialTheme.colorScheme
-                .fromToken(ElevatedButton.DisabledLabelTextColor)
-                .copy(alpha = ElevatedButton.DisabledLabelTextOpacity),
+        containerColor: Color = ElevatedButtonTokens.ContainerColor.toColor(),
+        contentColor: Color = ElevatedButtonTokens.LabelTextColor.toColor(),
+        disabledContainerColor: Color = ElevatedButtonTokens.DisabledContainerColor
+            .toColor()
+            .copy(alpha = ElevatedButtonTokens.DisabledContainerOpacity),
+        disabledContentColor: Color = ElevatedButtonTokens.DisabledLabelTextColor
+            .toColor()
+            .copy(alpha = ElevatedButtonTokens.DisabledLabelTextOpacity),
     ): ButtonColors =
         DefaultButtonColors(
             containerColor = containerColor,
@@ -565,18 +568,14 @@ object ButtonDefaults {
      */
     @Composable
     fun filledTonalButtonColors(
-        containerColor: Color =
-            MaterialTheme.colorScheme.fromToken(FilledButtonTonal.TonalContainerColor),
-        contentColor: Color =
-            MaterialTheme.colorScheme.fromToken(FilledButtonTonal.TonalLabelTextColor),
-        disabledContainerColor: Color =
-            MaterialTheme.colorScheme
-                .fromToken(FilledButtonTonal.TonalDisabledContainerColor)
-                .copy(alpha = FilledButtonTonal.TonalDisabledContainerOpacity),
-        disabledContentColor: Color =
-            MaterialTheme.colorScheme
-                .fromToken(FilledButtonTonal.TonalDisabledLabelTextColor)
-                .copy(alpha = FilledButtonTonal.TonalDisabledLabelTextOpacity),
+        containerColor: Color = FilledTonalButtonTokens.ContainerColor.toColor(),
+        contentColor: Color = FilledTonalButtonTokens.LabelTextColor.toColor(),
+        disabledContainerColor: Color = FilledTonalButtonTokens.DisabledContainerColor
+            .toColor()
+            .copy(alpha = FilledTonalButtonTokens.DisabledContainerOpacity),
+        disabledContentColor: Color = FilledTonalButtonTokens.DisabledLabelTextColor
+            .toColor()
+            .copy(alpha = FilledTonalButtonTokens.DisabledLabelTextOpacity),
     ): ButtonColors =
         DefaultButtonColors(
             containerColor = containerColor,
@@ -597,12 +596,11 @@ object ButtonDefaults {
     @Composable
     fun outlinedButtonColors(
         containerColor: Color = Color.Transparent,
-        contentColor: Color = MaterialTheme.colorScheme.fromToken(OutlinedButton.LabelTextColor),
+        contentColor: Color = OutlinedButtonTokens.LabelTextColor.toColor(),
         disabledContainerColor: Color = Color.Transparent,
-        disabledContentColor: Color =
-            MaterialTheme.colorScheme
-                .fromToken(OutlinedButton.DisabledLabelTextColor)
-                .copy(alpha = OutlinedButton.DisabledLabelTextOpacity),
+        disabledContentColor: Color = OutlinedButtonTokens.DisabledLabelTextColor
+            .toColor()
+            .copy(alpha = OutlinedButtonTokens.DisabledLabelTextOpacity),
     ): ButtonColors =
         DefaultButtonColors(
             containerColor = containerColor,
@@ -623,15 +621,11 @@ object ButtonDefaults {
     @Composable
     fun textButtonColors(
         containerColor: Color = Color.Transparent,
-        contentColor: Color = MaterialTheme.colorScheme.fromToken(TextButton.LabelTextColor),
-        disabledContainerColor: Color =
-            MaterialTheme.colorScheme
-                .fromToken(TextButton.DisabledContainerColor)
-                .copy(alpha = TextButton.DisabledContainerOpacity),
-        disabledContentColor: Color =
-            MaterialTheme.colorScheme
-                .fromToken(TextButton.DisabledLabelTextColor)
-                .copy(alpha = TextButton.DisabledLabelTextOpacity),
+        contentColor: Color = TextButtonTokens.LabelTextColor.toColor(),
+        disabledContainerColor: Color = Color.Transparent,
+        disabledContentColor: Color = TextButtonTokens.DisabledLabelTextColor
+            .toColor()
+            .copy(alpha = TextButtonTokens.DisabledLabelTextOpacity),
     ): ButtonColors =
         DefaultButtonColors(
             containerColor = containerColor,
@@ -653,11 +647,11 @@ object ButtonDefaults {
      */
     @Composable
     fun buttonElevation(
-        defaultElevation: Dp = FilledButton.ContainerElevation,
-        pressedElevation: Dp = FilledButton.PressedContainerElevation,
-        focusedElevation: Dp = FilledButton.FocusContainerElevation,
-        hoveredElevation: Dp = FilledButton.HoverContainerElevation,
-        disabledElevation: Dp = FilledButton.DisabledContainerElevation,
+        defaultElevation: Dp = FilledButtonTokens.ContainerElevation,
+        pressedElevation: Dp = FilledButtonTokens.PressedContainerElevation,
+        focusedElevation: Dp = FilledButtonTokens.FocusContainerElevation,
+        hoveredElevation: Dp = FilledButtonTokens.HoverContainerElevation,
+        disabledElevation: Dp = FilledButtonTokens.DisabledContainerElevation,
     ): ButtonElevation {
         return remember(
             defaultElevation,
@@ -689,11 +683,11 @@ object ButtonDefaults {
      */
     @Composable
     fun elevatedButtonElevation(
-        defaultElevation: Dp = ElevatedButton.ContainerElevation,
-        pressedElevation: Dp = ElevatedButton.PressedContainerElevation,
-        focusedElevation: Dp = ElevatedButton.FocusContainerElevation,
-        hoveredElevation: Dp = ElevatedButton.HoverContainerElevation,
-        disabledElevation: Dp = ElevatedButton.DisabledContainerElevation
+        defaultElevation: Dp = ElevatedButtonTokens.ContainerElevation,
+        pressedElevation: Dp = ElevatedButtonTokens.PressedContainerElevation,
+        focusedElevation: Dp = ElevatedButtonTokens.FocusContainerElevation,
+        hoveredElevation: Dp = ElevatedButtonTokens.HoverContainerElevation,
+        disabledElevation: Dp = ElevatedButtonTokens.DisabledContainerElevation
     ): ButtonElevation {
         return remember(
             defaultElevation,
@@ -726,10 +720,10 @@ object ButtonDefaults {
      */
     @Composable
     fun filledTonalButtonElevation(
-        defaultElevation: Dp = FilledButtonTonal.TonalContainerElevation,
-        pressedElevation: Dp = FilledButtonTonal.TonalPressedContainerElevation,
-        focusedElevation: Dp = FilledButtonTonal.TonalFocusContainerElevation,
-        hoveredElevation: Dp = FilledButtonTonal.TonalHoverContainerElevation,
+        defaultElevation: Dp = FilledTonalButtonTokens.ContainerElevation,
+        pressedElevation: Dp = FilledTonalButtonTokens.PressedContainerElevation,
+        focusedElevation: Dp = FilledTonalButtonTokens.FocusContainerElevation,
+        hoveredElevation: Dp = FilledTonalButtonTokens.HoverContainerElevation,
         disabledElevation: Dp = 0.dp
     ): ButtonElevation {
         return remember(
@@ -753,8 +747,8 @@ object ButtonDefaults {
     val outlinedButtonBorder: BorderStroke
         @Composable
         get() = BorderStroke(
-            width = OutlinedButton.OutlineWidth,
-            color = MaterialTheme.colorScheme.fromToken(OutlinedButton.OutlineColor)
+            width = OutlinedButtonTokens.OutlineWidth,
+            color = OutlinedButtonTokens.OutlineColor.toColor(),
         )
 }
 

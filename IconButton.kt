@@ -21,7 +21,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.tokens.IconButton
+import androidx.compose.material3.tokens.IconButtonTokens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -72,7 +72,7 @@ fun IconButton(
                     interactionSource = interactionSource,
                     indication = rememberRipple(
                         bounded = false,
-                        radius = IconButton.StateLayerSize / 2
+                        radius = IconButtonTokens.StateLayerSize / 2
                     )
                 ),
         contentAlignment = Alignment.Center
@@ -80,9 +80,9 @@ fun IconButton(
         val contentColor =
             if (enabled) LocalContentColor.current
             else
-                MaterialTheme.colorScheme
-                    .fromToken(IconButton.DisabledIconColor)
-                    .copy(alpha = IconButton.DisabledIconOpacity)
+                IconButtonTokens.DisabledIconColor
+                    .toColor()
+                    .copy(alpha = IconButtonTokens.DisabledIconOpacity)
         CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
     }
 }
@@ -126,17 +126,15 @@ fun IconToggleButton(
                     interactionSource = interactionSource,
                     indication = rememberRipple(
                         bounded = false,
-                        radius = IconButton.StateLayerSize / 2
+                        radius = IconButtonTokens.StateLayerSize / 2
                     )
                 ),
         contentAlignment = Alignment.Center
     ) {
         val contentColor =
             if (enabled) LocalContentColor.current
-            else
-                MaterialTheme.colorScheme
-                    .fromToken(IconButton.DisabledIconColor)
-                    .copy(alpha = IconButton.DisabledIconOpacity)
+            else IconButtonTokens.DisabledIconColor.toColor()
+                    .copy(alpha = IconButtonTokens.DisabledIconOpacity)
         CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
     }
 }

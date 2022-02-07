@@ -31,7 +31,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.tokens.CheckboxTokens
-import androidx.compose.material3.tokens.ColorSchemeKey
+import androidx.compose.material3.tokens.ColorSchemeKeyTokens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import kotlin.math.floor
 import kotlin.math.max
 
@@ -80,6 +81,7 @@ import kotlin.math.max
  * @param colors [CheckboxColors] that will be used to resolve the color used for this [Checkbox] in
  * different states. See [CheckboxDefaults.colors]
  */
+@ExperimentalMaterial3Api
 @Composable
 fun Checkbox(
     checked: Boolean,
@@ -229,17 +231,16 @@ object CheckboxDefaults {
      */
     @Composable
     fun colors(
-        checkedColor: Color = MaterialTheme.colorScheme.fromToken(CheckboxTokens.SelectedIconColor),
-        uncheckedColor: Color =
-            MaterialTheme.colorScheme.fromToken(CheckboxTokens.UnselectedIconColor),
+        checkedColor: Color = CheckboxTokens.SelectedIconColor.toColor(),
+        uncheckedColor: Color = CheckboxTokens.UnselectedIconColor.toColor(),
         // TODO(b/188529841): Update the token when this issue is resolved.
-        checkmarkColor: Color = MaterialTheme.colorScheme.fromToken(ColorSchemeKey.Surface),
-        disabledCheckedColor: Color =
-            MaterialTheme.colorScheme.fromToken(CheckboxTokens.DisabledSelectedIconColor)
-                .copy(alpha = CheckboxTokens.DisabledSelectedIconOpacity),
-        disabledUncheckedColor: Color =
-            MaterialTheme.colorScheme.fromToken(CheckboxTokens.DisabledUnselectedIconColor)
-                .copy(alpha = CheckboxTokens.DisabledUnselectedIconOpacity),
+        checkmarkColor: Color = ColorSchemeKeyTokens.Surface.toColor(),
+        disabledCheckedColor: Color = CheckboxTokens.DisabledSelectedIconColor
+            .toColor()
+            .copy(alpha = CheckboxTokens.DisabledSelectedIconOpacity),
+        disabledUncheckedColor: Color = CheckboxTokens.DisabledUnselectedIconColor
+            .toColor()
+            .copy(alpha = CheckboxTokens.DisabledUnselectedIconOpacity),
         disabledIndeterminateColor: Color = disabledCheckedColor
     ): CheckboxColors {
         return remember(
@@ -337,21 +338,29 @@ private fun DrawScope.drawBox(
     val halfStrokeWidth = strokeWidth / 2.0f
     val stroke = Stroke(strokeWidth)
     val checkboxSize = size.width
-    drawRoundRect(
-        boxColor,
-        topLeft = Offset(strokeWidth, strokeWidth),
-        size = Size(checkboxSize - strokeWidth * 2, checkboxSize - strokeWidth * 2),
-        // Set the inner radius to be equal to the outer radius - border's stroke width.
-        cornerRadius = CornerRadius(max(0f, radius - strokeWidth)),
-        style = Fill
-    )
-    drawRoundRect(
-        borderColor,
-        topLeft = Offset(halfStrokeWidth, halfStrokeWidth),
-        size = Size(checkboxSize - strokeWidth, checkboxSize - strokeWidth),
-        cornerRadius = CornerRadius(radius),
-        style = stroke
-    )
+    if (boxColor == borderColor) {
+        drawRoundRect(
+            boxColor,
+            size = Size(checkboxSize, checkboxSize),
+            cornerRadius = CornerRadius(radius),
+            style = Fill
+        )
+    } else {
+        drawRoundRect(
+            boxColor,
+            topLeft = Offset(strokeWidth, strokeWidth),
+            size = Size(checkboxSize - strokeWidth * 2, checkboxSize - strokeWidth * 2),
+            cornerRadius = CornerRadius(max(0f, radius - strokeWidth)),
+            style = Fill
+        )
+        drawRoundRect(
+            borderColor,
+            topLeft = Offset(halfStrokeWidth, halfStrokeWidth),
+            size = Size(checkboxSize - strokeWidth, checkboxSize - strokeWidth),
+            cornerRadius = CornerRadius(radius - halfStrokeWidth),
+            style = stroke
+        )
+    }
 }
 
 private fun DrawScope.drawCheck(

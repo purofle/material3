@@ -16,21 +16,14 @@
 
 package androidx.compose.material3
 
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.tokens.NavigationDrawer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
@@ -43,26 +36,23 @@ import androidx.compose.ui.unit.dp
  * screen, by ensuring proper layout strategy for them and collecting necessary data so these
  * components will work together correctly.
  *
- * @param modifier optional Modifier for the root of the [Scaffold]
- * @param scaffoldState state of this scaffold widget. It contains the state of the screen, e.g.
- * variables to provide manual control over the drawer behavior, sizes of components, etc
+ * Simple example of a Scaffold with [SmallTopAppBar], [FloatingActionButton]:
+ *
+ * @sample androidx.compose.material3.samples.SimpleScaffoldWithTopBar
+ *
+ * To show a [Snackbar], use [SnackbarHostState.showSnackbar].
+ *
+ * @sample androidx.compose.material3.samples.ScaffoldWithSimpleSnackbar
+ *
+ * @param modifier optional Modifier for the root of the [Scaffold].
  * @param topBar top app bar of the screen. Consider using [SmallTopAppBar].
  * @param bottomBar bottom bar of the screen. Consider using [NavigationBar].
+ * @param snackbarHost component to host [Snackbar]s that are pushed to be shown via
+ * [SnackbarHostState.showSnackbar]. Usually it's a [SnackbarHost].
  * @param floatingActionButton Main action button of your screen. Consider using
  * [FloatingActionButton] for this slot.
  * @param floatingActionButtonPosition position of the FAB on the screen. See [FabPosition] for
  * possible options available.
- * @param drawerContent content of the Drawer sheet that can be pulled from the left side (right
- * for RTL).
- * @param drawerGesturesEnabled whether or not drawer (if set) can be interacted with via gestures
- * @param drawerShape shape of the drawer sheet (if set)
- * @param drawerTonalElevation Affects the alpha of the color overlay applied on the container color
- * of the drawer sheet.
- * @param drawerContainerColor container color to be used for the drawer sheet
- * @param drawerContentColor color of the content to use inside the drawer sheet. Defaults to
- * either the matching content color for [drawerContainerColor], or, if it is not a color from
- * the theme, this will keep the same value set above this Surface.
- * @param drawerScrimColor color of the scrim that obscures content when the drawer is open
  * @param containerColor background of the scaffold body
  * @param contentColor color of the content in scaffold body. Defaults to either the matching
  * content color for [containerColor], or, if it is not a color from the theme, this will keep
@@ -72,56 +62,28 @@ import androidx.compose.ui.unit.dp
  * you're using Modifier.VerticalScroll, apply this modifier to the child of the scroll, and not on
  * the scroll itself.
  */
-// TODO(b/198144133): Add Simple example of a Scaffold with [SmallTopAppBar], [FloatingActionButton]
-//  and [Navigation drawer].
 @ExperimentalMaterial3Api
 @Composable
 fun Scaffold(
     modifier: Modifier = Modifier,
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
     topBar: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
+    snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
-    drawerContent: @Composable (ColumnScope.() -> Unit)? = null,
-    drawerGesturesEnabled: Boolean = true,
-    drawerShape: Shape = RoundedCornerShape(16.dp),
-    drawerTonalElevation: Dp = DrawerDefaults.Elevation,
-    drawerContainerColor: Color =
-        MaterialTheme.colorScheme.fromToken(NavigationDrawer.ContainerColor),
-    drawerContentColor: Color = contentColorFor(drawerContainerColor),
-    drawerScrimColor: Color = DrawerDefaults.scrimColor,
     containerColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = contentColorFor(containerColor),
     content: @Composable (PaddingValues) -> Unit
 ) {
-    val child = @Composable { childModifier: Modifier ->
-        Surface(modifier = childModifier, color = containerColor, contentColor = contentColor) {
-            ScaffoldLayout(
-                fabPosition = floatingActionButtonPosition,
-                topBar = topBar,
-                bottomBar = bottomBar,
-                content = content,
-                fab = floatingActionButton
-            )
-        }
-    }
-
-    if (drawerContent != null) {
-        NavigationDrawer(
-            modifier = modifier,
-            drawerState = scaffoldState.drawerState,
-            gesturesEnabled = drawerGesturesEnabled,
-            drawerContent = drawerContent,
-            drawerShape = drawerShape,
-            drawerTonalElevation = drawerTonalElevation,
-            drawerContainerColor = drawerContainerColor,
-            drawerContentColor = drawerContentColor,
-            scrimColor = drawerScrimColor,
-            content = { child(Modifier) }
+    Surface(modifier = modifier, color = containerColor, contentColor = contentColor) {
+        ScaffoldLayout(
+            fabPosition = floatingActionButtonPosition,
+            topBar = topBar,
+            bottomBar = bottomBar,
+            content = content,
+            snackbar = snackbarHost,
+            fab = floatingActionButton
         )
-    } else {
-        child(modifier)
     }
 }
 
@@ -131,7 +93,9 @@ fun Scaffold(
  * @param fabPosition [FabPosition] for the FAB (if present)
  * @param topBar the content to place at the top of the [Scaffold], typically a [SmallTopAppBar]
  * @param content the main 'body' of the [Scaffold]
- * @param fab the [FloatingActionButton] displayed on top of the [content]
+ * @param snackbar the [Snackbar] displayed on top of the [content]
+ * @param fab the [FloatingActionButton] displayed on top of the [content], below the [snackbar]
+ * and above the [bottomBar]
  * @param bottomBar the content to place at the bottom of the [Scaffold], on top of the
  * [content], typically a [NavigationBar].
  */
@@ -141,6 +105,7 @@ private fun ScaffoldLayout(
     fabPosition: FabPosition,
     topBar: @Composable () -> Unit,
     content: @Composable (PaddingValues) -> Unit,
+    snackbar: @Composable () -> Unit,
     fab: @Composable () -> Unit,
     bottomBar: @Composable () -> Unit
 
@@ -157,6 +122,13 @@ private fun ScaffoldLayout(
             }
 
             val topBarHeight = topBarPlaceables.maxByOrNull { it.height }?.height ?: 0
+
+            val snackbarPlaceables = subcompose(ScaffoldLayoutContent.Snackbar, snackbar).map {
+                it.measure(looseConstraints)
+            }
+
+            val snackbarHeight = snackbarPlaceables.maxByOrNull { it.height }?.height ?: 0
+            val snackbarWidth = snackbarPlaceables.maxByOrNull { it.width }?.width ?: 0
 
             val fabPlaceables =
                 subcompose(ScaffoldLayoutContent.Fab, fab).mapNotNull { measurable ->
@@ -204,6 +176,12 @@ private fun ScaffoldLayout(
                 }
             }
 
+            val snackbarOffsetFromBottom = if (snackbarHeight != 0) {
+                snackbarHeight + (fabOffsetFromBottom ?: bottomBarHeight)
+            } else {
+                0
+            }
+
             val bodyContentHeight = layoutHeight - topBarHeight
 
             val bodyContentPlaceables = subcompose(ScaffoldLayoutContent.MainContent) {
@@ -219,6 +197,12 @@ private fun ScaffoldLayout(
             topBarPlaceables.forEach {
                 it.place(0, 0)
             }
+            snackbarPlaceables.forEach {
+                it.place(
+                    (layoutWidth - snackbarWidth) / 2,
+                    layoutHeight - snackbarOffsetFromBottom
+                )
+            }
             // The bottom bar is always at the bottom of the layout
             bottomBarPlaceables.forEach {
                 it.place(0, layoutHeight - bottomBarHeight)
@@ -231,33 +215,6 @@ private fun ScaffoldLayout(
             }
         }
     }
-}
-
-/**
- * State for [Scaffold] composable component.
- *
- * Contains basic screen state, e.g. Drawer configuration, as well as sizes of components after
- * layout has happened
- *
- * @param drawerState the drawer state
- */
-@Stable
-@ExperimentalMaterial3Api
-class ScaffoldState(
-    val drawerState: DrawerState,
-)
-
-/**
- * Creates a [ScaffoldState] with the default animation clock and memoizes it.
- *
- * @param drawerState the drawer state
- */
-@ExperimentalMaterial3Api
-@Composable
-fun rememberScaffoldState(
-    drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed),
-): ScaffoldState = remember {
-    ScaffoldState(drawerState)
 }
 
 /**
@@ -312,4 +269,4 @@ internal val LocalFabPlacement = staticCompositionLocalOf<FabPlacement?> { null 
 // FAB spacing above the bottom bar / bottom of the Scaffold
 private val FabSpacing = 16.dp
 
-private enum class ScaffoldLayoutContent { TopBar, MainContent, Fab, BottomBar }
+private enum class ScaffoldLayoutContent { TopBar, MainContent, Snackbar, Fab, BottomBar }

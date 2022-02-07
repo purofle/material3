@@ -16,10 +16,12 @@
 
 package androidx.compose.material3
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
-import androidx.compose.material3.tokens.State
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.tokens.StateTokens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -63,10 +65,13 @@ fun MaterialTheme(
     }.apply {
         updateColorSchemeFrom(colorScheme)
     }
+    val rippleIndication = rememberRipple()
     CompositionLocalProvider(
         LocalColorScheme provides rememberedColorScheme,
-        LocalTypography provides typography,
+        LocalIndication provides rippleIndication,
         LocalRippleTheme provides MaterialRippleTheme,
+        LocalTypography provides typography,
+
     ) {
         ProvideTextStyle(value = typography.bodyLarge, content = content)
     }
@@ -104,8 +109,8 @@ private object MaterialRippleTheme : RippleTheme {
 }
 
 private val DefaultRippleAlpha = RippleAlpha(
-    pressedAlpha = State.PressedStateLayerOpacity,
-    focusedAlpha = State.FocusStateLayerOpacity,
-    draggedAlpha = State.DraggedStateLayerOpacity,
-    hoveredAlpha = State.HoverStateLayerOpacity
+    pressedAlpha = StateTokens.PressedStateLayerOpacity,
+    focusedAlpha = StateTokens.FocusStateLayerOpacity,
+    draggedAlpha = StateTokens.DraggedStateLayerOpacity,
+    hoveredAlpha = StateTokens.HoverStateLayerOpacity
 )

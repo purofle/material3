@@ -32,6 +32,4 @@ internal inline class Strings private constructor(@Suppress("unused") private va
 }
 
 @Composable
-internal fun getString(string: Strings): String {
-    return ""
-}
+internal expect fun getString(string: Strings): String

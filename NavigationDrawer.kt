@@ -29,8 +29,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.tokens.NavigationDrawer
-import androidx.compose.material3.tokens.Palette
+import androidx.compose.material3.tokens.NavigationDrawerTokens
+import androidx.compose.material3.tokens.PaletteTokens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
@@ -250,8 +250,7 @@ fun NavigationDrawer(
     gesturesEnabled: Boolean = true,
     drawerShape: Shape = RoundedCornerShape(0.dp, 16.dp, 16.dp, 0.dp),
     drawerTonalElevation: Dp = DrawerDefaults.Elevation,
-    drawerContainerColor: Color =
-        MaterialTheme.colorScheme.fromToken(NavigationDrawer.ContainerColor),
+    drawerContainerColor: Color = NavigationDrawerTokens.ContainerColor.toColor(),
     drawerContentColor: Color = contentColorFor(drawerContainerColor),
     scrimColor: Color = DrawerDefaults.scrimColor,
     content: @Composable () -> Unit
@@ -306,7 +305,7 @@ fun NavigationDrawer(
                         .sizeIn(
                             minWidth = navigationDrawerConstraints.minWidth.toDp(),
                             minHeight = navigationDrawerConstraints.minHeight.toDp(),
-                            maxWidth = NavigationDrawer.ContainerWidth,
+                            maxWidth = NavigationDrawerTokens.ContainerWidth,
                             maxHeight = navigationDrawerConstraints.maxHeight.toDp()
                         )
                 }
@@ -344,11 +343,11 @@ object DrawerDefaults {
     /**
      * Default Elevation for drawer sheet as specified in material specs
      */
-    val Elevation = NavigationDrawer.ModalContainerElevation
+    val Elevation = NavigationDrawerTokens.ModalContainerElevation
 
     val scrimColor: Color
         @Composable
-        get() = Palette.NeutralVariant0.copy(alpha = NavigationDrawer.ScrimOpacity)
+        get() = PaletteTokens.NeutralVariant0.copy(alpha = NavigationDrawerTokens.ScrimOpacity)
 }
 
 private fun calculateFraction(a: Float, b: Float, pos: Float) =
