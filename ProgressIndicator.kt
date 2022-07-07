@@ -48,11 +48,13 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.max
 
-// TODO: Link to M3 spec and add image when available.
+// TODO: Link to M3 spec when available.
 /**
  * Determinate Material Design linear progress indicator.
  *
- * Progress indicators express an unspecified wait time or display the length of a process.
+ * Progress indicators express an unspecified wait time or display the duration of a process.
+ *
+ * ![Linear progress indicator image](https://developer.android.com/images/reference/androidx/compose/material3/linear-progress-indicator.png)
  *
  * By default there is no animation between [progress] values. You can use
  * [ProgressIndicatorDefaults.ProgressAnimationSpec] as the default recommended [AnimationSpec] when
@@ -60,19 +62,19 @@ import kotlin.math.max
  *
  * @sample androidx.compose.material3.samples.LinearProgressIndicatorSample
  *
- * @param progress The progress of this progress indicator, where 0.0 represents no progress and 1.0
+ * @param progress the progress of this progress indicator, where 0.0 represents no progress and 1.0
  * represents full progress. Values outside of this range are coerced into the range.
- * @param modifier The modifier of the progress indicator.
- * @param color The color of the progress indicator.
- * @param trackColor The color of the track behind the indicator, visible when the progress has not
- * reached the area of the overall indicator yet.
+ * @param modifier the [Modifier] to be applied to this progress indicator
+ * @param color color of this progress indicator
+ * @param trackColor color of the track behind the indicator, visible when the progress has not
+ * reached the area of the overall indicator yet
  */
 @Composable
 fun LinearProgressIndicator(
     progress: Float,
     modifier: Modifier = Modifier,
-    color: Color = LinearProgressIndicatorTokens.ActiveIndicatorColor.toColor(),
-    trackColor: Color = LinearProgressIndicatorTokens.TrackColor.toColor(),
+    color: Color = ProgressIndicatorDefaults.LinearColor,
+    trackColor: Color = ProgressIndicatorDefaults.LinearTrackColor,
 ) {
     Canvas(
         modifier
@@ -85,22 +87,26 @@ fun LinearProgressIndicator(
     }
 }
 
-// TODO: Link to M3 spec and add image when available.
+// TODO: Link to M3 spec when available.
 /**
  * Indeterminate Material Design linear progress indicator.
  *
- * Progress indicators express an unspecified wait time or display the length of a process.
+ * Progress indicators express an unspecified wait time or display the duration of a process.
  *
- * @param modifier The modifier of the progress indicator.
- * @param color The color of the progress indicator.
- * @param trackColor The color of the track behind the indicator, visible when the progress has not
- * reached the area of the overall indicator yet.
+ * ![Linear progress indicator image](https://developer.android.com/images/reference/androidx/compose/material3/linear-progress-indicator.png)
+ *
+ * @sample androidx.compose.material3.samples.IndeterminateLinearProgressIndicatorSample
+ *
+ * @param modifier the [Modifier] to be applied to this progress indicator
+ * @param color color of this progress indicator
+ * @param trackColor color of the track behind the indicator, visible when the progress has not
+ * reached the area of the overall indicator yet
  */
 @Composable
 fun LinearProgressIndicator(
     modifier: Modifier = Modifier,
-    color: Color = LinearProgressIndicatorTokens.ActiveIndicatorColor.toColor(),
-    trackColor: Color = LinearProgressIndicatorTokens.TrackColor.toColor(),
+    color: Color = ProgressIndicatorDefaults.LinearColor,
+    trackColor: Color = ProgressIndicatorDefaults.LinearTrackColor,
 ) {
     val infiniteTransition = rememberInfiniteTransition()
     // Fractional position of the 'head' and 'tail' of the two lines drawn, i.e. if the head is 0.8
@@ -200,11 +206,13 @@ private fun DrawScope.drawLinearIndicatorTrack(
     strokeWidth: Float
 ) = drawLinearIndicator(0f, 1f, color, strokeWidth)
 
-// TODO: Link to M3 spec and add image when available.
+// TODO: Link to M3 spec when available.
 /**
  * Determinate Material Design circular progress indicator.
  *
- * Progress indicators express an unspecified wait time or display the length of a process.
+ * Progress indicators express an unspecified wait time or display the duration of a process.
+ *
+ * ![Circular progress indicator image](https://developer.android.com/images/reference/androidx/compose/material3/circular-progress-indicator.png)
  *
  * By default there is no animation between [progress] values. You can use
  * [ProgressIndicatorDefaults.ProgressAnimationSpec] as the default recommended [AnimationSpec] when
@@ -212,18 +220,18 @@ private fun DrawScope.drawLinearIndicatorTrack(
  *
  * @sample androidx.compose.material3.samples.CircularProgressIndicatorSample
  *
- * @param progress The progress of this progress indicator, where 0.0 represents no progress and 1.0
+ * @param progress the progress of this progress indicator, where 0.0 represents no progress and 1.0
  * represents full progress. Values outside of this range are coerced into the range.
- * @param modifier The modifier of the progress indicator.
- * @param color The color of the progress indicator.
- * @param strokeWidth The stroke width for the progress indicator.
+ * @param modifier the [Modifier] to be applied to this progress indicator
+ * @param color color of this progress indicator
+ * @param strokeWidth stroke width of this progress indicator
  */
 @Composable
 fun CircularProgressIndicator(
     progress: Float,
     modifier: Modifier = Modifier,
-    color: Color = CircularProgressIndicatorTokens.ActiveIndicatorColor.toColor(),
-    strokeWidth: Dp = CircularProgressIndicatorTokens.ActiveIndicatorWidth
+    color: Color = ProgressIndicatorDefaults.CircularColor,
+    strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth
 ) {
     val stroke = with(LocalDensity.current) {
         Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Butt)
@@ -240,21 +248,25 @@ fun CircularProgressIndicator(
     }
 }
 
-// TODO: Link to M3 spec and add image when available.
+// TODO: Link to M3 spec when available.
 /**
  * Indeterminate Material Design circular progress indicator.
  *
- * Progress indicators express an unspecified wait time or display the length of a process.
+ * Progress indicators express an unspecified wait time or display the duration of a process.
  *
- * @param modifier The modifier of the progress indicator.
- * @param color The color of the progress indicator.
- * @param strokeWidth The stroke width for the progress indicator.
+ * ![Circular progress indicator image](https://developer.android.com/images/reference/androidx/compose/material3/circular-progress-indicator.png)
+ *
+ * @sample androidx.compose.material3.samples.IndeterminateCircularProgressIndicatorSample
+ *
+ * @param modifier the [Modifier] to be applied to this progress indicator
+ * @param color color of this progress indicator
+ * @param strokeWidth stroke width of this progress indicator
  */
 @Composable
 fun CircularProgressIndicator(
     modifier: Modifier = Modifier,
-    color: Color = CircularProgressIndicatorTokens.ActiveIndicatorColor.toColor(),
-    strokeWidth: Dp = CircularProgressIndicatorTokens.ActiveIndicatorWidth
+    color: Color = ProgressIndicatorDefaults.CircularColor,
+    strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth
 ) {
     val stroke = with(LocalDensity.current) {
         Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Square)
@@ -385,6 +397,21 @@ private fun DrawScope.drawIndeterminateCircularIndicator(
  * Contains the default values used for [LinearProgressIndicator] and [CircularProgressIndicator].
  */
 object ProgressIndicatorDefaults {
+    /** Default color for a linear progress indicator. */
+    val LinearColor: Color @Composable get() =
+        LinearProgressIndicatorTokens.ActiveIndicatorColor.toColor()
+
+    /** Default color for a circular progress indicator. */
+    val CircularColor: Color @Composable get() =
+        CircularProgressIndicatorTokens.ActiveIndicatorColor.toColor()
+
+    /** Default track color for a linear progress indicator. */
+    val LinearTrackColor: Color @Composable get() =
+        LinearProgressIndicatorTokens.TrackColor.toColor()
+
+    /** Default stroke width for a circular progress indicator. */
+    val CircularStrokeWidth = CircularProgressIndicatorTokens.ActiveIndicatorWidth
+
     /**
      * The default [AnimationSpec] that should be used when animating between progress in a
      * determinate progress indicator.

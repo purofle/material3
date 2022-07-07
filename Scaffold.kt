@@ -44,22 +44,21 @@ import androidx.compose.ui.unit.dp
  *
  * @sample androidx.compose.material3.samples.ScaffoldWithSimpleSnackbar
  *
- * @param modifier optional Modifier for the root of the [Scaffold].
- * @param topBar top app bar of the screen. Consider using [SmallTopAppBar].
- * @param bottomBar bottom bar of the screen. Consider using [NavigationBar].
+ * @param modifier the [Modifier] to be applied to this scaffold
+ * @param topBar top app bar of the screen, typically a [SmallTopAppBar]
+ * @param bottomBar bottom bar of the screen, typically a [NavigationBar]
  * @param snackbarHost component to host [Snackbar]s that are pushed to be shown via
- * [SnackbarHostState.showSnackbar]. Usually it's a [SnackbarHost].
- * @param floatingActionButton Main action button of your screen. Consider using
- * [FloatingActionButton] for this slot.
- * @param floatingActionButtonPosition position of the FAB on the screen. See [FabPosition] for
- * possible options available.
- * @param containerColor background of the scaffold body
- * @param contentColor color of the content in scaffold body. Defaults to either the matching
- * content color for [containerColor], or, if it is not a color from the theme, this will keep
- * the same value set above this Surface.
- * @param content content of your screen. The lambda receives an [PaddingValues] that should be
- * applied to the content root via Modifier.padding to properly offset top and bottom bars. If
- * you're using Modifier.VerticalScroll, apply this modifier to the child of the scroll, and not on
+ * [SnackbarHostState.showSnackbar], typically a [SnackbarHost]
+ * @param floatingActionButton Main action button of the screen, typically a [FloatingActionButton]
+ * @param floatingActionButtonPosition position of the FAB on the screen. See [FabPosition].
+ * @param containerColor the color used for the background of this scaffold. Use [Color.Transparent]
+ * to have no color.
+ * @param contentColor the preferred color for content inside this scaffold. Defaults to either the
+ * matching content color for [containerColor], or to the current [LocalContentColor] if
+ * [containerColor] is not a color from the theme.
+ * @param content content of the screen. The lambda receives a [PaddingValues] that should be
+ * applied to the content root via [Modifier.padding] to properly offset top and bottom bars. If
+ * using [Modifier.verticalScroll], apply this modifier to the child of the scroll, and not on
  * the scroll itself.
  */
 @ExperimentalMaterial3Api
@@ -182,17 +181,18 @@ private fun ScaffoldLayout(
                 0
             }
 
-            val bodyContentHeight = layoutHeight - topBarHeight
-
             val bodyContentPlaceables = subcompose(ScaffoldLayoutContent.MainContent) {
-                val innerPadding = PaddingValues(bottom = bottomBarHeight.toDp())
+                val innerPadding = PaddingValues(
+                    top = topBarHeight.toDp(),
+                    bottom = bottomBarHeight.toDp()
+                )
                 content(innerPadding)
-            }.map { it.measure(looseConstraints.copy(maxHeight = bodyContentHeight)) }
+            }.map { it.measure(looseConstraints) }
 
             // Placing to control drawing order to match default elevation of each placeable
 
             bodyContentPlaceables.forEach {
-                it.place(0, topBarHeight)
+                it.place(0, 0)
             }
             topBarPlaceables.forEach {
                 it.place(0, 0)
@@ -222,8 +222,8 @@ private fun ScaffoldLayout(
  */
 // TODO(b/200553810): Mark as experimental
 @ExperimentalMaterial3Api
-@Suppress("INLINE_CLASS_DEPRECATED", "EXPERIMENTAL_FEATURE_WARNING")
-inline class FabPosition internal constructor(@Suppress("unused") private val value: Int) {
+@kotlin.jvm.JvmInline
+value class FabPosition internal constructor(@Suppress("unused") private val value: Int) {
     companion object {
         /**
          * Position FAB at the bottom of the screen in the center, above the [NavigationBar] (if it

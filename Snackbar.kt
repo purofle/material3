@@ -37,6 +37,7 @@ import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import kotlin.math.max
 import kotlin.math.min
@@ -45,6 +46,8 @@ import kotlin.math.min
  * Material Design snackbar.
  *
  * Snackbars provide brief messages about app processes at the bottom of the screen.
+ *
+ * ![Snackbar image](https://developer.android.com/images/reference/androidx/compose/material3/snackbar.png)
  *
  * Snackbars inform users of a process that an app has performed or will perform. They appear
  * temporarily, towards the bottom of the screen. They shouldn’t interrupt the user experience,
@@ -65,19 +68,23 @@ import kotlin.math.min
  * of the [SnackbarHost] to the [Scaffold]:
  * @sample androidx.compose.material3.samples.ScaffoldWithCustomSnackbar
  *
- * @param modifier modifiers for the Snackbar layout
+ * @param modifier the [Modifier] to be applied to this snackbar
  * @param action action / button component to add as an action to the snackbar. Consider using
  * [ColorScheme.inversePrimary] as the color for the action, if you do not have a predefined color
  * you wish to use instead.
  * @param dismissAction action / button component to add as an additional close affordance action
  * when a snackbar is non self-dismissive. Consider using [ColorScheme.inverseOnSurface] as the
  * color for the action, if you do not have a predefined color you wish to use instead.
- * @param actionOnNewLine whether or not action should be put on the separate line. Recommended
- * for action with long action text
- * @param shape defines the Snackbar's shape (as well as its shadow when using `shadowElevation`)
- * @param containerColor background color of the Snackbar
- * @param contentColor the preferred color for content inside this Snackbar. Also see
- * [LocalContentColor] which is used by [Text] and [Icon] by default.
+ * @param actionOnNewLine whether or not action should be put on a separate line. Recommended for
+ * action with long action text.
+ * @param shape defines the shape of this snackbar's container
+ * @param containerColor the color used for the background of this snackbar. Use [Color.Transparent]
+ * to have no color.
+ * @param contentColor the preferred color for content inside this snackbar
+ * @param actionContentColor the preferred content color for the optional [action] inside this
+ * snackbar
+ * @param dismissActionContentColor the preferred content color for the optional [dismissAction]
+ * inside this snackbar
  * @param content content to show information about a process that an app has performed or will
  * perform
  */
@@ -87,9 +94,11 @@ fun Snackbar(
     action: @Composable (() -> Unit)? = null,
     dismissAction: @Composable (() -> Unit)? = null,
     actionOnNewLine: Boolean = false,
-    shape: Shape = SnackbarTokens.ContainerShape,
-    containerColor: Color = SnackbarTokens.ContainerColor.toColor(),
-    contentColor: Color = SnackbarTokens.SupportingTextColor.toColor(),
+    shape: Shape = SnackbarDefaults.Shape,
+    containerColor: Color = SnackbarDefaults.Color,
+    contentColor: Color = SnackbarDefaults.ContentColor,
+    actionContentColor: Color = SnackbarDefaults.ActionContentColor,
+    dismissActionContentColor: Color = SnackbarDefaults.DismissActionContentColor,
     content: @Composable () -> Unit
 ) {
     Surface(
@@ -100,18 +109,32 @@ fun Snackbar(
         shadowElevation = SnackbarTokens.ContainerElevation
     ) {
         val textStyle = MaterialTheme.typography.fromToken(SnackbarTokens.SupportingTextFont)
+        val actionTextStyle = MaterialTheme.typography.fromToken(SnackbarTokens.ActionLabelTextFont)
         CompositionLocalProvider(LocalTextStyle provides textStyle) {
             when {
                 action == null -> OneRowSnackbar(
                     text = content,
                     action = null,
-                    dismissAction = dismissAction
+                    dismissAction = dismissAction,
+                    actionTextStyle,
+                    actionContentColor,
+                    dismissActionContentColor
                 )
-                actionOnNewLine -> NewLineButtonSnackbar(content, action, dismissAction)
+                actionOnNewLine -> NewLineButtonSnackbar(
+                    content,
+                    action,
+                    dismissAction,
+                    actionTextStyle,
+                    actionContentColor,
+                    dismissActionContentColor
+                )
                 else -> OneRowSnackbar(
                     text = content,
                     action = action,
-                    dismissAction = dismissAction
+                    dismissAction = dismissAction,
+                    actionTextStyle,
+                    actionContentColor,
+                    dismissActionContentColor
                 )
             }
         }
@@ -122,6 +145,8 @@ fun Snackbar(
  * Material Design snackbar.
  *
  * Snackbars provide brief messages about app processes at the bottom of the screen.
+ *
+ * ![Snackbar image](https://developer.android.com/images/reference/androidx/compose/material3/snackbar.png)
  *
  * Snackbars inform users of a process that an app has performed or will perform. They appear
  * temporarily, towards the bottom of the screen. They shouldn’t interrupt the user experience,
@@ -153,24 +178,30 @@ fun Snackbar(
  * @sample androidx.compose.material3.samples.ScaffoldWithIndefiniteSnackbar
  *
  * @param snackbarData data about the current snackbar showing via [SnackbarHostState]
- * @param modifier modifiers for the Snackbar layout
- * @param actionOnNewLine whether or not the Snackbar's action should be put on the separate line
- * (recommended for action with long action text)
- * @param shape defines the Snackbar's shape (as well as its shadow when using `shadowElevation`)
- * @param containerColor background color of the Snackbar
- * @param contentColor the preferred color for content inside this Snackbar. Also see
- * [LocalContentColor] which is used by [Text] and [Icon] by default.
- * @param actionColor color of the Snackbar's action
+ * @param modifier the [Modifier] to be applied to this snackbar
+ * @param actionOnNewLine whether or not action should be put on a separate line. Recommended for
+ * action with long action text.
+ * @param shape defines the shape of this snackbar's container
+ * @param containerColor the color used for the background of this snackbar. Use [Color.Transparent]
+ * to have no color.
+ * @param contentColor the preferred color for content inside this snackbar
+ * @param actionColor the color of the snackbar's action
+ * @param actionContentColor the preferred content color for the optional action inside this
+ * snackbar. See [SnackbarVisuals.actionLabel].
+ * @param dismissActionContentColor the preferred content color for the optional dismiss action
+ * inside this snackbar. See [SnackbarVisuals.withDismissAction].
  */
 @Composable
 fun Snackbar(
     snackbarData: SnackbarData,
     modifier: Modifier = Modifier,
     actionOnNewLine: Boolean = false,
-    shape: Shape = SnackbarTokens.ContainerShape,
-    containerColor: Color = SnackbarTokens.ContainerColor.toColor(),
-    contentColor: Color = SnackbarTokens.SupportingTextColor.toColor(),
-    actionColor: Color = SnackbarTokens.ActionLabelTextColor.toColor()
+    shape: Shape = SnackbarDefaults.Shape,
+    containerColor: Color = SnackbarDefaults.Color,
+    contentColor: Color = SnackbarDefaults.ContentColor,
+    actionColor: Color = SnackbarDefaults.ActionColor,
+    actionContentColor: Color = SnackbarDefaults.ActionContentColor,
+    dismissActionContentColor: Color = SnackbarDefaults.DismissActionContentColor,
 ) {
     val actionLabel = snackbarData.visuals.actionLabel
     val actionComposable: (@Composable () -> Unit)? = if (actionLabel != null) {
@@ -208,6 +239,8 @@ fun Snackbar(
         shape = shape,
         containerColor = containerColor,
         contentColor = contentColor,
+        actionContentColor = actionContentColor,
+        dismissActionContentColor = dismissActionContentColor,
         content = { Text(snackbarData.visuals.message) }
     )
 }
@@ -216,7 +249,10 @@ fun Snackbar(
 private fun NewLineButtonSnackbar(
     text: @Composable () -> Unit,
     action: @Composable () -> Unit,
-    dismissAction: @Composable (() -> Unit)?
+    dismissAction: @Composable (() -> Unit)?,
+    actionTextStyle: TextStyle,
+    actionContentColor: Color,
+    dismissActionContentColor: Color
 ) {
     Column(
         modifier = Modifier
@@ -238,19 +274,14 @@ private fun NewLineButtonSnackbar(
                 .padding(end = if (dismissAction == null) HorizontalSpacingButtonSide else 0.dp)
         ) {
             Row {
-                val actionTextColor = SnackbarTokens.ActionLabelTextColor.toColor()
-                val actionTextStyle =
-                    MaterialTheme.typography.fromToken(SnackbarTokens.ActionLabelTextFont)
                 CompositionLocalProvider(
-                    LocalContentColor provides actionTextColor,
+                    LocalContentColor provides actionContentColor,
                     LocalTextStyle provides actionTextStyle,
                     content = action
                 )
-
                 if (dismissAction != null) {
-                    val dismissActionColor = SnackbarTokens.IconColor.toColor()
                     CompositionLocalProvider(
-                        LocalContentColor provides dismissActionColor,
+                        LocalContentColor provides dismissActionContentColor,
                         content = dismissAction
                     )
                 }
@@ -263,7 +294,10 @@ private fun NewLineButtonSnackbar(
 private fun OneRowSnackbar(
     text: @Composable () -> Unit,
     action: @Composable (() -> Unit)?,
-    dismissAction: @Composable (() -> Unit)?
+    dismissAction: @Composable (() -> Unit)?,
+    actionTextStyle: TextStyle,
+    actionTextColor: Color,
+    dismissActionColor: Color
 ) {
     val textTag = "text"
     val actionTag = "action"
@@ -273,9 +307,6 @@ private fun OneRowSnackbar(
             Box(Modifier.layoutId(textTag).padding(vertical = SnackbarVerticalPadding)) { text() }
             if (action != null) {
                 Box(Modifier.layoutId(actionTag)) {
-                    val actionTextColor = SnackbarTokens.ActionLabelTextColor.toColor()
-                    val actionTextStyle =
-                        MaterialTheme.typography.fromToken(SnackbarTokens.ActionLabelTextFont)
                     CompositionLocalProvider(
                         LocalContentColor provides actionTextColor,
                         LocalTextStyle provides actionTextStyle,
@@ -285,7 +316,6 @@ private fun OneRowSnackbar(
             }
             if (dismissAction != null) {
                 Box(Modifier.layoutId(dismissActionTag)) {
-                    val dismissActionColor = SnackbarTokens.IconColor.toColor()
                     CompositionLocalProvider(
                         LocalContentColor provides dismissActionColor,
                         content = dismissAction
@@ -366,6 +396,29 @@ private fun OneRowSnackbar(
             actionButtonPlaceable?.placeRelative(actionButtonPlaceX, actionButtonPlaceY)
         }
     }
+}
+
+/**
+ * Contains the default values used for [Snackbar].
+ */
+object SnackbarDefaults {
+    /** Default shape of a snackbar. */
+    val Shape: Shape @Composable get() = SnackbarTokens.ContainerShape.toShape()
+
+    /** Default color of a snackbar. */
+    val Color: Color @Composable get() = SnackbarTokens.ContainerColor.toColor()
+
+    /** Default content color of a snackbar. */
+    val ContentColor: Color @Composable get() = SnackbarTokens.SupportingTextColor.toColor()
+
+    /** Default action color of a snackbar. */
+    val ActionColor: Color @Composable get() = SnackbarTokens.ActionLabelTextColor.toColor()
+
+    /** Default action content color of a snackbar. */
+    val ActionContentColor: Color @Composable get() = SnackbarTokens.ActionLabelTextColor.toColor()
+
+    /** Default dismiss action content color of a snackbar. */
+    val DismissActionContentColor: Color @Composable get() = SnackbarTokens.IconColor.toColor()
 }
 
 private val ContainerMaxWidth = 600.dp

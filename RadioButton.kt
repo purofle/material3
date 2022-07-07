@@ -48,6 +48,9 @@ import androidx.compose.ui.unit.dp
  * Material Design radio button.
  *
  * Radio buttons allow users to select one option from a set.
+ *
+ * ![Radio button image](https://developer.android.com/images/reference/androidx/compose/material3/radio-button.png)
+ *
  * @sample androidx.compose.material3.samples.RadioButtonSample
  *
  * [RadioButton]s can be combined together with [Text] in the desired layout (e.g. [Column] or
@@ -55,19 +58,18 @@ import androidx.compose.ui.unit.dp
  * @sample androidx.compose.material3.samples.RadioGroupSample
  *
  * @param selected whether this radio button is selected or not
- * @param onClick callback to be invoked when the RadioButton is clicked. If null, then this
- * RadioButton will not handle input events, and only act as a visual indicator of [selected] state
- * @param modifier Modifier to be applied to the radio button
- * @param enabled Controls the enabled state of the [RadioButton]. When `false`, this button will
- * not be selectable and appears disabled
- * @param interactionSource the [MutableInteractionSource] representing the stream of
- * [Interaction]s for this RadioButton. You can create and pass in your own remembered
- * [MutableInteractionSource] if you want to observe [Interaction]s and customize the
- * appearance / behavior of this RadioButton in different [Interaction]s.
- * @param colors [RadioButtonColors] that will be used to resolve the color used for this
- * RadioButton in different states. See [RadioButtonDefaults.colors].
+ * @param onClick called when this radio button is clicked. If `null`, then this radio button will
+ * not be interactable, unless something else handles its input events and updates its state.
+ * @param modifier the [Modifier] to be applied to this radio button
+ * @param enabled controls the enabled state of this radio button. When `false`, this component will
+ * not respond to user input, and it will appear visually disabled and disabled to accessibility
+ * services.
+ * @param interactionSource the [MutableInteractionSource] representing the stream of [Interaction]s
+ * for this radio button. You can create and pass in your own `remember`ed instance to observe
+ * [Interaction]s and customize the appearance / behavior of this radio button in different states.
+ * @param colors [RadioButtonColors] that will be used to resolve the color used for this radio
+ * button in different states. See [RadioButtonDefaults.colors].
  */
-@ExperimentalMaterial3Api
 @Composable
 fun RadioButton(
     selected: Boolean,

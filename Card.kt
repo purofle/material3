@@ -39,177 +39,311 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.Dp
 import kotlinx.coroutines.flow.collect
 
 /**
  * <a href="https://m3.material.io/components/cards/overview" class="external" target="_blank">Material Design filled card</a>.
  *
- * Cards contain content and actions about a single subject. Filled cards provide subtle separation
- * from the background. This has less emphasis than elevated or outlined cards.
+ * Cards contain contain content and actions that relate information about a subject. Filled cards
+ * provide subtle separation from the background. This has less emphasis than elevated or outlined
+ * cards.
  *
- * This card will react to interactions when the given [interactionSource] is not null.
+ * This Card does not handle input events - see the other Card overloads if you want a clickable or
+ * selectable Card.
  *
- * Static card sample:
+ * ![Filled card image](https://developer.android.com/images/reference/androidx/compose/material3/filled-card.png)
+ *
+ * Card sample:
  * @sample androidx.compose.material3.samples.CardSample
+ *
+ * @param modifier the [Modifier] to be applied to this card
+ * @param shape defines the shape of this card's container, border (when [border] is not null), and
+ * shadow (when using [elevation])
+ * @param border the border to draw around the container of this card
+ * @param elevation [CardElevation] used to resolve the elevation for this card in different states.
+ * This controls the size of the shadow below the card. Additionally, when the container color is
+ * [ColorScheme.surface], this controls the amount of primary color applied as an overlay. See also:
+ * [Surface].
+ * @param colors [CardColors] that will be used to resolve the colors used for this card in
+ * different states. See [CardDefaults.cardColors].
+ */
+@Composable
+fun Card(
+    modifier: Modifier = Modifier,
+    shape: Shape = CardDefaults.Shape,
+    border: BorderStroke? = null,
+    elevation: CardElevation = CardDefaults.cardElevation(),
+    colors: CardColors = CardDefaults.cardColors(),
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = modifier,
+        shape = shape,
+        color = colors.containerColor(enabled = true).value,
+        contentColor = colors.contentColor(enabled = true).value,
+        tonalElevation = elevation.tonalElevation(enabled = true, interactionSource = null).value,
+        shadowElevation = elevation.shadowElevation(enabled = true, interactionSource = null).value,
+        border = border,
+    ) {
+        Column(content = content)
+    }
+}
+
+/**
+ * <a href="https://m3.material.io/components/cards/overview" class="external" target="_blank">Material Design filled card</a>.
+ *
+ * Cards contain contain content and actions that relate information about a subject. Filled cards
+ * provide subtle separation from the background. This has less emphasis than elevated or outlined
+ * cards.
+ *
+ * This Card handles click events, calling its [onClick] lambda.
+ *
+ * ![Filled card image](https://developer.android.com/images/reference/androidx/compose/material3/filled-card.png)
  *
  * Clickable card sample:
  * @sample androidx.compose.material3.samples.ClickableCardSample
  *
- * @param modifier Modifier to be applied to the layout of the card.
- * @param interactionSource the [MutableInteractionSource] representing the stream of
- * [Interaction]s for this Card. You can create and pass in your own remembered
- * [MutableInteractionSource] to observe [Interaction]s that will customize the appearance
- * / behavior of this card in different states. Cards with null interaction source will not react to
- * interactions.
- * @param shape Defines the card's shape.
- * @param containerColor The container color of the card.
- * @param contentColor The preferred content color provided by this card to its children.
- * Defaults to either the matching content color for [containerColor], or if [containerColor]
- * is not a color from the theme, this will keep the same value set above this card.
- * @param border [BorderStroke] to draw on top of the card.
- * @param elevation [CardElevation] used to resolve the elevation for this card when the
- * [interactionSource] emits its states. The resolved values control the size of the shadow below
- * the card, as well as its tonal elevation. When [containerColor] is [ColorScheme.surface], a
- * higher tonal elevation value will result in a darker card color in light theme and lighter color
- * in dark theme. See also [Surface].
+ * @param onClick called when this card is clicked
+ * @param modifier the [Modifier] to be applied to this card
+ * @param enabled controls the enabled state of this card. When `false`, this component will not
+ * respond to user input, and it will appear visually disabled and disabled to accessibility
+ * services.
+ * @param interactionSource the [MutableInteractionSource] representing the stream of [Interaction]s
+ * for this card. You can create and pass in your own `remember`ed instance to observe
+ * [Interaction]s and customize the appearance / behavior of this card in different states.
+ * @param shape defines the shape of this card's container, border (when [border] is not null), and
+ * shadow (when using [elevation])
+ * @param border the border to draw around the container of this card
+ * @param elevation [CardElevation] used to resolve the elevation for this card in different states.
+ * This controls the size of the shadow below the card. Additionally, when the container color is
+ * [ColorScheme.surface], this controls the amount of primary color applied as an overlay. See also:
+ * [Surface].
+ * @param colors [CardColors] that will be used to resolve the color(s) used for this card in
+ * different states. See [CardDefaults.cardColors].
  */
 @ExperimentalMaterial3Api
 @Composable
 fun Card(
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    interactionSource: InteractionSource? = null,
-    shape: Shape = FilledCardTokens.ContainerShape,
-    containerColor: Color = FilledCardTokens.ContainerColor.toColor(),
-    contentColor: Color = contentColorFor(containerColor),
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    shape: Shape = CardDefaults.Shape,
     border: BorderStroke? = null,
     elevation: CardElevation = CardDefaults.cardElevation(),
+    colors: CardColors = CardDefaults.cardColors(),
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val cardContent = @Composable { Column(content = content) }
     Surface(
+        onClick = onClick,
         modifier = modifier,
-        interactionSource = interactionSource,
+        enabled = enabled,
         shape = shape,
-        color = containerColor,
-        contentColor = contentColor,
-        tonalElevation = elevation.tonalElevation(interactionSource).value,
-        shadowElevation = elevation.shadowElevation(interactionSource).value,
+        color = colors.containerColor(enabled).value,
+        contentColor = colors.contentColor(enabled).value,
+        tonalElevation = elevation.tonalElevation(enabled, interactionSource).value,
+        shadowElevation = elevation.shadowElevation(enabled, interactionSource).value,
         border = border,
-        content = cardContent
-    )
+        interactionSource = interactionSource,
+    ) {
+        Column(content = content)
+    }
 }
 
 /**
  * <a href="https://m3.material.io/components/cards/overview" class="external" target="_blank">Material Design elevated card</a>.
  *
- * Elevated cards contain content and actions about a single subject. They have a drop shadow,
- * providing more separation from the background than filled cards, but less than outlined cards.
+ * Elevated cards contain content and actions that relate information about a subject. They have a
+ * drop shadow, providing more separation from the background than filled cards, but less than
+ * outlined cards.
  *
- * This card will react to interactions when the given [interactionSource] is not null.
+ * This ElevatedCard does not handle input events - see the other ElevatedCard overloads if you
+ * want a clickable or selectable ElevatedCard.
  *
- * Static elevated card sample:
+ * ![Elevated card image](https://developer.android.com/images/reference/androidx/compose/material3/elevated-card.png)
+ *
+ * Elevated card sample:
  * @sample androidx.compose.material3.samples.ElevatedCardSample
+ *
+ * @param modifier the [Modifier] to be applied to this card
+ * @param shape defines the shape of this card's container and shadow (when using [elevation])
+ * @param elevation [CardElevation] used to resolve the elevation for this card in different states.
+ * This controls the size of the shadow below the card. Additionally, when the container color is
+ * [ColorScheme.surface], this controls the amount of primary color applied as an overlay. See also:
+ * [Surface].
+ * @param colors [CardColors] that will be used to resolve the color(s) used for this card in
+ * different states. See [CardDefaults.elevatedCardElevation].
+ */
+@Composable
+fun ElevatedCard(
+    modifier: Modifier = Modifier,
+    shape: Shape = CardDefaults.ElevatedShape,
+    elevation: CardElevation = CardDefaults.elevatedCardElevation(),
+    colors: CardColors = CardDefaults.elevatedCardColors(),
+    content: @Composable ColumnScope.() -> Unit
+) = Card(
+    modifier = modifier,
+    shape = shape,
+    border = null,
+    elevation = elevation,
+    colors = colors,
+    content = content
+)
+
+/**
+ * <a href="https://m3.material.io/components/cards/overview" class="external" target="_blank">Material Design elevated card</a>.
+ *
+ * Elevated cards contain content and actions that relate information about a subject. They have a
+ * drop shadow, providing more separation from the background than filled cards, but less than
+ * outlined cards.
+ *
+ * This ElevatedCard handles click events, calling its [onClick] lambda.
+ *
+ * ![Elevated card image](https://developer.android.com/images/reference/androidx/compose/material3/elevated-card.png)
  *
  * Clickable elevated card sample:
  * @sample androidx.compose.material3.samples.ClickableElevatedCardSample
  *
- * @param modifier Modifier to be applied to the layout of the card.
- * @param interactionSource the [MutableInteractionSource] representing the stream of
- * [Interaction]s for this Card. You can create and pass in your own remembered
- * [MutableInteractionSource] to observe [Interaction]s that will customize the appearance
- * / behavior of this card in different states. Cards with null interaction source will not react to
- * interactions.
- * @param shape Defines the card's shape.
- * @param containerColor The container color of the card.
- * @param contentColor The preferred content color provided by this card to its children.
- * Defaults to either the matching content color for [containerColor], or if [containerColor]
- * is not a color from the theme, this will keep the same value set above this card.
- * @param elevation [CardElevation] used to resolve the elevation for this card when the
- * [interactionSource] emits its states. The resolved values control the size of the shadow below
- * the card, as well as its tonal elevation. When [containerColor] is [ColorScheme.surface], a
- * higher tonal elevation value will result in a darker card color in light theme and lighter color
- * in dark theme. See also [Surface].
+ * @param onClick called when this card is clicked
+ * @param modifier the [Modifier] to be applied to this card
+ * @param enabled controls the enabled state of this card. When `false`, this component will not
+ * respond to user input, and it will appear visually disabled and disabled to accessibility
+ * services.
+ * @param interactionSource the [MutableInteractionSource] representing the stream of [Interaction]s
+ * for this card. You can create and pass in your own `remember`ed instance to observe
+ * [Interaction]s and customize the appearance / behavior of this card in different states.
+ * @param shape defines the shape of this card's container and shadow (when using [elevation])
+ * @param elevation [CardElevation] used to resolve the elevation for this card in different states.
+ * This controls the size of the shadow below the card. Additionally, when the container color is
+ * [ColorScheme.surface], this controls the amount of primary color applied as an overlay. See also:
+ * [Surface].
+ * @param colors [CardColors] that will be used to resolve the color(s) used for this card in
+ * different states. See [CardDefaults.elevatedCardElevation].
  */
 @ExperimentalMaterial3Api
 @Composable
 fun ElevatedCard(
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    interactionSource: InteractionSource? = null,
-    shape: Shape = ElevatedCardTokens.ContainerShape,
-    containerColor: Color = ElevatedCardTokens.ContainerColor.toColor(),
-    contentColor: Color = contentColorFor(containerColor),
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    shape: Shape = CardDefaults.ElevatedShape,
     elevation: CardElevation = CardDefaults.elevatedCardElevation(),
+    colors: CardColors = CardDefaults.elevatedCardColors(),
     content: @Composable ColumnScope.() -> Unit
 ) = Card(
+    onClick = onClick,
     modifier = modifier,
+    enabled = enabled,
     interactionSource = interactionSource,
     shape = shape,
-    containerColor = containerColor,
-    contentColor = contentColor,
     border = null,
     elevation = elevation,
+    colors = colors,
     content = content
 )
 
 /**
  * <a href="https://m3.material.io/components/cards/overview" class="external" target="_blank">Material Design outlined card</a>.
  *
- * Outlined cards contain content and actions about a single subject. They have a visual boundary
- * around the container. This can provide greater emphasis than the other types.
+ * Outlined cards contain content and actions that relate information about a subject. They have a
+ * visual boundary around the container. This can provide greater emphasis than the other types.
  *
- * This card will react to interactions when the given [interactionSource] is not null.
+ * This OutlinedCard does not handle input events - see the other OutlinedCard overloads if you want
+ * a clickable or selectable OutlinedCard.
  *
- * Static outlined card sample:
+ * ![Outlined card image](https://developer.android.com/images/reference/androidx/compose/material3/outlined-card.png)
+ *
+ * Outlined card sample:
  * @sample androidx.compose.material3.samples.OutlinedCardSample
+ *
+ * @param modifier the [Modifier] to be applied to this card
+ * @param shape defines the shape of this card's container, border (when [border] is not null), and
+ * shadow (when using [elevation])
+ * @param border the border to draw around the container of this card
+ * @param elevation [CardElevation] used to resolve the elevation for this card in different states.
+ * This controls the size of the shadow below the card. Additionally, when the container color is
+ * [ColorScheme.surface], this controls the amount of primary color applied as an overlay. See also:
+ * [Surface].
+ * @param colors [CardColors] that will be used to resolve the color(s) used for this card in
+ * different states. See [CardDefaults.outlinedCardColors].
+ */
+@Composable
+fun OutlinedCard(
+    modifier: Modifier = Modifier,
+    shape: Shape = CardDefaults.OutlinedShape,
+    border: BorderStroke = CardDefaults.outlinedCardBorder(),
+    elevation: CardElevation = CardDefaults.outlinedCardElevation(),
+    colors: CardColors = CardDefaults.outlinedCardColors(),
+    content: @Composable ColumnScope.() -> Unit
+) = Card(
+    modifier = modifier,
+    shape = shape,
+    border = border,
+    elevation = elevation,
+    colors = colors,
+    content = content
+)
+
+/**
+ * <a href="https://m3.material.io/components/cards/overview" class="external" target="_blank">Material Design outlined card</a>.
+ *
+ * Outlined cards contain content and actions that relate information about a subject. They have a
+ * visual boundary around the container. This can provide greater emphasis than the other types.
+ *
+ * This OutlinedCard handles click events, calling its [onClick] lambda.
+ *
+ * ![Outlined card image](https://developer.android.com/images/reference/androidx/compose/material3/outlined-card.png)
  *
  * Clickable outlined card sample:
  * @sample androidx.compose.material3.samples.ClickableOutlinedCardSample
  *
- * @param modifier Modifier to be applied to the layout of the card.
- * @param interactionSource the [MutableInteractionSource] representing the stream of
- * [Interaction]s for this Card. You can create and pass in your own remembered
- * [MutableInteractionSource] to observe [Interaction]s that will customize the appearance
- * / behavior of this card in different states. Cards with null interaction source will not react to
- * interactions.
- * @param shape Defines the card's shape.
- * @param containerColor The container color of the card.
- * @param contentColor The preferred content color provided by this card to its children.
- * Defaults to either the matching content color for [containerColor], or if [containerColor]
- * is not a color from the theme, this will keep the same value set above this card.
- * @param border [BorderStroke] to draw on top of the card.
- * @param elevation [CardElevation] used to resolve the elevation for this card when the
- * [interactionSource] emits its states. The resolved values control the size of the shadow below
- * the card, as well as its tonal elevation. When [containerColor] is [ColorScheme.surface], a
- * higher tonal elevation value will result in a darker card color in light theme and lighter color
- * in dark theme. See also [Surface].
+ * @param onClick called when this card is clicked
+ * @param modifier the [Modifier] to be applied to this card
+ * @param enabled controls the enabled state of this card. When `false`, this component will not
+ * respond to user input, and it will appear visually disabled and disabled to accessibility
+ * services.
+ * @param interactionSource the [MutableInteractionSource] representing the stream of [Interaction]s
+ * for this card. You can create and pass in your own `remember`ed instance to observe
+ * [Interaction]s and customize the appearance / behavior of this card in different states.
+ * @param shape defines the shape of this card's container, border (when [border] is not null), and
+ * shadow (when using [elevation])
+ * @param border the border to draw around the container of this card
+ * @param elevation [CardElevation] used to resolve the elevation for this card in different states.
+ * This controls the size of the shadow below the card. Additionally, when the container color is
+ * [ColorScheme.surface], this controls the amount of primary color applied as an overlay. See also:
+ * [Surface].
+ * @param colors [CardColors] that will be used to resolve the color(s) used for this card in
+ * different states. See [CardDefaults.outlinedCardColors].
  */
 @ExperimentalMaterial3Api
 @Composable
 fun OutlinedCard(
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    interactionSource: InteractionSource? = null,
-    shape: Shape = OutlinedCardTokens.ContainerShape,
-    containerColor: Color = OutlinedCardTokens.ContainerColor.toColor(),
-    contentColor: Color = contentColorFor(containerColor),
-    border: BorderStroke = BorderStroke(
-        OutlinedCardTokens.OutlineWidth,
-        OutlinedCardTokens.OutlineColor.toColor()
-    ),
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    shape: Shape = CardDefaults.OutlinedShape,
+    border: BorderStroke = CardDefaults.outlinedCardBorder(enabled),
     elevation: CardElevation = CardDefaults.outlinedCardElevation(),
+    colors: CardColors = CardDefaults.outlinedCardColors(),
     content: @Composable ColumnScope.() -> Unit
 ) = Card(
+    onClick = onClick,
     modifier = modifier,
+    enabled = enabled,
     interactionSource = interactionSource,
     shape = shape,
-    containerColor = containerColor,
-    contentColor = contentColor,
     border = border,
     elevation = elevation,
+    colors = colors,
     content = content
 )
 
@@ -223,38 +357,75 @@ fun OutlinedCard(
 @Stable
 interface CardElevation {
     /**
-     * Represents the tonal elevation used in a card, depending on its [interactionSource].
+     * Represents the tonal elevation used in a card, depending on its [enabled] state and
+     * [interactionSource]. This should typically be the same value as the [shadowElevation].
      *
      * Tonal elevation is used to apply a color shift to the surface to give the it higher emphasis.
+     * When surface's color is [ColorScheme.surface], a higher elevation will result in a darker
+     * color in light theme and lighter color in dark theme.
      *
-     * For all Material cards with elevation, this returns the same value as [shadowElevation].
+     * See [shadowElevation] which controls the elevation of the shadow drawn around the card.
      *
-     * - See [shadowElevation] for an elevation that draws a shadow around the card's bounds.
-     *
+     * @param enabled whether the card is enabled
      * @param interactionSource the [InteractionSource] for this card
      */
     @Composable
-    fun tonalElevation(interactionSource: InteractionSource?): State<Dp>
+    fun tonalElevation(enabled: Boolean, interactionSource: InteractionSource?): State<Dp>
 
     /**
-     * Represents the shadow elevation used in a button, depending on the [interactionSource].
+     * Represents the shadow elevation used in a card, depending on its [enabled] state and
+     * [interactionSource]. This should typically be the same value as the [tonalElevation].
      *
-     * Shadow elevation is used to apply a drop shadow around the card to give it higher emphasis.
+     * Shadow elevation is used to apply a shadow around the card to give it higher emphasis.
      *
-     * For all Material cards with elevation, this returns the same value as [tonalElevation].
+     * See [tonalElevation] which controls the elevation with a color shift to the surface.
      *
-     * - See [tonalElevation] for an elevation that applies a color shift to the surface.
-     *
+     * @param enabled whether the card is enabled
      * @param interactionSource the [InteractionSource] for this card
      */
     @Composable
-    fun shadowElevation(interactionSource: InteractionSource?): State<Dp>
+    fun shadowElevation(enabled: Boolean, interactionSource: InteractionSource?): State<Dp>
+}
+
+/**
+ * Represents the container and content colors used in a card in different states.
+ *
+ * - See [CardDefaults.cardColors] for the default colors used in a [Card].
+ * - See [CardDefaults.elevatedCardColors] for the default colors used in a [ElevatedCard].
+ * - See [CardDefaults.outlinedCardColors] for the default colors used in a [OutlinedCard].
+ */
+@Stable
+interface CardColors {
+    /**
+     * Represents the container color for this card, depending on [enabled].
+     *
+     * @param enabled whether the card is enabled
+     */
+    @Composable
+    fun containerColor(enabled: Boolean): State<Color>
+
+    /**
+     * Represents the content color for this card, depending on [enabled].
+     *
+     * @param enabled whether the card is enabled
+     */
+    @Composable
+    fun contentColor(enabled: Boolean): State<Color>
 }
 
 /**
  * Contains the default values used by all card types.
  */
 object CardDefaults {
+    // Shape Defaults
+    /** Default shape for a card. */
+    val Shape: Shape @Composable get() = FilledCardTokens.ContainerShape.toShape()
+
+    /** Default shape for an elevated card. */
+    val ElevatedShape: Shape @Composable get() = ElevatedCardTokens.ContainerShape.toShape()
+
+    /** Default shape for an outlined card. */
+    val OutlinedShape: Shape @Composable get() = OutlinedCardTokens.ContainerShape.toShape()
 
     /**
      * Creates a [CardElevation] that will animate between the provided values according to the
@@ -272,14 +443,16 @@ object CardDefaults {
         pressedElevation: Dp = FilledCardTokens.PressedContainerElevation,
         focusedElevation: Dp = FilledCardTokens.FocusContainerElevation,
         hoveredElevation: Dp = FilledCardTokens.HoverContainerElevation,
-        draggedElevation: Dp = FilledCardTokens.DraggedContainerElevation
+        draggedElevation: Dp = FilledCardTokens.DraggedContainerElevation,
+        disabledElevation: Dp = FilledCardTokens.DisabledContainerElevation
     ): CardElevation {
         return remember(
             defaultElevation,
             pressedElevation,
             focusedElevation,
             hoveredElevation,
-            draggedElevation
+            draggedElevation,
+            disabledElevation
         ) {
             DefaultCardElevation(
                 defaultElevation = defaultElevation,
@@ -287,6 +460,7 @@ object CardDefaults {
                 focusedElevation = focusedElevation,
                 hoveredElevation = hoveredElevation,
                 draggedElevation = draggedElevation,
+                disabledElevation = disabledElevation
             )
         }
     }
@@ -308,14 +482,16 @@ object CardDefaults {
         pressedElevation: Dp = ElevatedCardTokens.PressedContainerElevation,
         focusedElevation: Dp = ElevatedCardTokens.FocusContainerElevation,
         hoveredElevation: Dp = ElevatedCardTokens.HoverContainerElevation,
-        draggedElevation: Dp = ElevatedCardTokens.DraggedContainerElevation
+        draggedElevation: Dp = ElevatedCardTokens.DraggedContainerElevation,
+        disabledElevation: Dp = ElevatedCardTokens.DisabledContainerElevation
     ): CardElevation {
         return remember(
             defaultElevation,
             pressedElevation,
             focusedElevation,
             hoveredElevation,
-            draggedElevation
+            draggedElevation,
+            disabledElevation
         ) {
             DefaultCardElevation(
                 defaultElevation = defaultElevation,
@@ -323,6 +499,7 @@ object CardDefaults {
                 focusedElevation = focusedElevation,
                 hoveredElevation = hoveredElevation,
                 draggedElevation = draggedElevation,
+                disabledElevation = disabledElevation
             )
         }
     }
@@ -344,14 +521,16 @@ object CardDefaults {
         pressedElevation: Dp = defaultElevation,
         focusedElevation: Dp = defaultElevation,
         hoveredElevation: Dp = defaultElevation,
-        draggedElevation: Dp = OutlinedCardTokens.DraggedContainerElevation
+        draggedElevation: Dp = OutlinedCardTokens.DraggedContainerElevation,
+        disabledElevation: Dp = OutlinedCardTokens.DisabledContainerElevation
     ): CardElevation {
         return remember(
             defaultElevation,
             pressedElevation,
             focusedElevation,
             hoveredElevation,
-            draggedElevation
+            draggedElevation,
+            disabledElevation
         ) {
             DefaultCardElevation(
                 defaultElevation = defaultElevation,
@@ -359,8 +538,113 @@ object CardDefaults {
                 focusedElevation = focusedElevation,
                 hoveredElevation = hoveredElevation,
                 draggedElevation = draggedElevation,
+                disabledElevation = disabledElevation
             )
         }
+    }
+
+    /**
+     * Creates a [CardColors] that represents the default container and content colors used in a
+     * [Card].
+     *
+     * @param containerColor the container color of this [Card] when enabled.
+     * @param contentColor the content color of this [Card] when enabled.
+     * @param disabledContainerColor the container color of this [Card] when not enabled.
+     * @param disabledContentColor the content color of this [Card] when not enabled.
+     */
+    @Composable
+    fun cardColors(
+        containerColor: Color = FilledCardTokens.ContainerColor.toColor(),
+        contentColor: Color = contentColorFor(containerColor),
+        disabledContainerColor: Color =
+            FilledCardTokens.DisabledContainerColor.toColor()
+                .copy(alpha = FilledCardTokens.DisabledContainerOpacity)
+                .compositeOver(
+                    MaterialTheme.colorScheme.surfaceColorAtElevation(
+                        FilledCardTokens.DisabledContainerElevation
+                    )
+                ),
+        disabledContentColor: Color = contentColorFor(containerColor).copy(DisabledAlpha),
+    ): CardColors =
+        DefaultCardColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+            disabledContainerColor = disabledContainerColor,
+            disabledContentColor = disabledContentColor
+        )
+
+    /**
+     * Creates a [CardColors] that represents the default container and content colors used in an
+     * [ElevatedCard].
+     *
+     * @param containerColor the container color of this [ElevatedCard] when enabled.
+     * @param contentColor the content color of this [ElevatedCard] when enabled.
+     * @param disabledContainerColor the container color of this [ElevatedCard] when not enabled.
+     * @param disabledContentColor the content color of this [ElevatedCard] when not enabled.
+     */
+    @Composable
+    fun elevatedCardColors(
+        containerColor: Color = ElevatedCardTokens.ContainerColor.toColor(),
+        contentColor: Color = contentColorFor(containerColor),
+        disabledContainerColor: Color =
+            ElevatedCardTokens.DisabledContainerColor.toColor()
+                .copy(alpha = ElevatedCardTokens.DisabledContainerOpacity)
+                .compositeOver(
+                    MaterialTheme.colorScheme.surfaceColorAtElevation(
+                        ElevatedCardTokens.DisabledContainerElevation
+                    )
+                ),
+        disabledContentColor: Color = contentColor.copy(DisabledAlpha),
+    ): CardColors =
+        DefaultCardColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+            disabledContainerColor = disabledContainerColor,
+            disabledContentColor = disabledContentColor
+        )
+
+    /**
+     * Creates a [CardColors] that represents the default container and content colors used in an
+     * [OutlinedCard].
+     *
+     * @param containerColor the container color of this [OutlinedCard] when enabled.
+     * @param contentColor the content color of this [OutlinedCard] when enabled.
+     * @param disabledContainerColor the container color of this [OutlinedCard] when not enabled.
+     * @param disabledContentColor the content color of this [OutlinedCard] when not enabled.
+     */
+    @Composable
+    fun outlinedCardColors(
+        containerColor: Color = OutlinedCardTokens.ContainerColor.toColor(),
+        contentColor: Color = contentColorFor(containerColor),
+        disabledContainerColor: Color = containerColor,
+        disabledContentColor: Color = contentColor.copy(DisabledAlpha),
+    ): CardColors =
+        DefaultCardColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+            disabledContainerColor = disabledContainerColor,
+            disabledContentColor = disabledContentColor
+        )
+
+    /**
+     * Creates a [BorderStroke] that represents the default border used in [OutlinedCard].
+     *
+     * @param enabled whether the card is enabled
+     */
+    @Composable
+    fun outlinedCardBorder(enabled: Boolean = true): BorderStroke {
+        val color = if (enabled) {
+            OutlinedCardTokens.OutlineColor.toColor()
+        } else {
+            OutlinedCardTokens.DisabledOutlineColor.toColor()
+                .copy(alpha = OutlinedCardTokens.DisabledOutlineOpacity)
+                .compositeOver(
+                    MaterialTheme.colorScheme.surfaceColorAtElevation(
+                        OutlinedCardTokens.DisabledContainerElevation
+                    )
+                )
+        }
+        return remember(color) { BorderStroke(OutlinedCardTokens.OutlineWidth, color) }
     }
 }
 
@@ -377,25 +661,35 @@ private class DefaultCardElevation(
     private val focusedElevation: Dp,
     private val hoveredElevation: Dp,
     private val draggedElevation: Dp,
+    private val disabledElevation: Dp
 ) : CardElevation {
     @Composable
-    override fun tonalElevation(interactionSource: InteractionSource?): State<Dp> {
+    override fun tonalElevation(
+        enabled: Boolean,
+        interactionSource: InteractionSource?
+    ): State<Dp> {
         if (interactionSource == null) {
             return remember { mutableStateOf(defaultElevation) }
         }
-        return animateElevation(interactionSource = interactionSource)
+        return animateElevation(enabled = enabled, interactionSource = interactionSource)
     }
 
     @Composable
-    override fun shadowElevation(interactionSource: InteractionSource?): State<Dp> {
+    override fun shadowElevation(
+        enabled: Boolean,
+        interactionSource: InteractionSource?
+    ): State<Dp> {
         if (interactionSource == null) {
             return remember { mutableStateOf(defaultElevation) }
         }
-        return animateElevation(interactionSource = interactionSource)
+        return animateElevation(enabled = enabled, interactionSource = interactionSource)
     }
 
     @Composable
-    private fun animateElevation(interactionSource: InteractionSource): State<Dp> {
+    private fun animateElevation(
+        enabled: Boolean,
+        interactionSource: InteractionSource
+    ): State<Dp> {
         val interactions = remember { mutableStateListOf<Interaction>() }
         LaunchedEffect(interactionSource) {
             interactionSource.interactions.collect { interaction ->
@@ -436,31 +730,82 @@ private class DefaultCardElevation(
 
         val interaction = interactions.lastOrNull()
 
-        val target = when (interaction) {
-            is PressInteraction.Press -> pressedElevation
-            is HoverInteraction.Enter -> hoveredElevation
-            is FocusInteraction.Focus -> focusedElevation
-            is DragInteraction.Start -> draggedElevation
-            else -> defaultElevation
-        }
+        val target =
+            if (!enabled) {
+                disabledElevation
+            } else {
+                when (interaction) {
+                    is PressInteraction.Press -> pressedElevation
+                    is HoverInteraction.Enter -> hoveredElevation
+                    is FocusInteraction.Focus -> focusedElevation
+                    is DragInteraction.Start -> draggedElevation
+                    else -> defaultElevation
+                }
+            }
 
         val animatable = remember { Animatable(target, Dp.VectorConverter) }
 
         LaunchedEffect(target) {
-            val lastInteraction = when (animatable.targetValue) {
-                pressedElevation -> PressInteraction.Press(Offset.Zero)
-                hoveredElevation -> HoverInteraction.Enter()
-                focusedElevation -> FocusInteraction.Focus()
-                draggedElevation -> DragInteraction.Start()
-                else -> null
+            if (enabled) {
+                val lastInteraction = when (animatable.targetValue) {
+                    pressedElevation -> PressInteraction.Press(Offset.Zero)
+                    hoveredElevation -> HoverInteraction.Enter()
+                    focusedElevation -> FocusInteraction.Focus()
+                    draggedElevation -> DragInteraction.Start()
+                    else -> null
+                }
+                animatable.animateElevation(
+                    from = lastInteraction,
+                    to = interaction,
+                    target = target
+                )
+            } else {
+                // No transition when moving to a disabled state.
+                animatable.snapTo(target)
             }
-            animatable.animateElevation(
-                from = lastInteraction,
-                to = interaction,
-                target = target
-            )
         }
 
         return animatable.asState()
+    }
+}
+
+/** Default [CardColors] implementation. */
+@Immutable
+private class DefaultCardColors(
+    private val containerColor: Color,
+    private val contentColor: Color,
+    private val disabledContainerColor: Color,
+    private val disabledContentColor: Color,
+) : CardColors {
+    @Composable
+    override fun containerColor(enabled: Boolean): State<Color> {
+        return rememberUpdatedState(if (enabled) containerColor else disabledContainerColor)
+    }
+
+    @Composable
+    override fun contentColor(enabled: Boolean): State<Color> {
+        return rememberUpdatedState(if (enabled) contentColor else disabledContentColor)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as DefaultCardColors
+
+        if (containerColor != other.containerColor) return false
+        if (contentColor != other.contentColor) return false
+        if (disabledContainerColor != other.disabledContainerColor) return false
+        if (disabledContentColor != other.disabledContentColor) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = containerColor.hashCode()
+        result = 31 * result + contentColor.hashCode()
+        result = 31 * result + disabledContainerColor.hashCode()
+        result = 31 * result + disabledContentColor.hashCode()
+        return result
     }
 }
